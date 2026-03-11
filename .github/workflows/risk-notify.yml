@@ -1,0 +1,36 @@
+# RiskDashboard — 定時推播 GitHub Actions Workflow
+# 每 5 分鐘執行一次，抓取市場資料並在訊號觸發時推播到 Discord
+#
+# 設定步驟：
+#   1. 至 GitHub repo → Settings → Secrets and variables → Actions
+#   2. 新增 Secret：名稱 = DISCORD_WEBHOOK_URL，值 = 你的 Discord Webhook URL
+
+name: Risk Sentinel Notify
+
+on:
+  schedule:
+    # UTC 時間，台灣時間 = UTC+8
+    # 下方設定為「台灣時間 週一至週五 08:00 ~ 隔日 06:00（即美股盤中+盤前）」
+    # 美股交易時段（台灣時間）：22:30 ~ 05:00（夏令）/ 23:30 ~ 06:00（冬令）
+    # 若要 24 小時全天監控，改成 cron: '*/5 * * * *'
+    - cron: '*/5 0-22 * * 1-5'   # UTC 00:00~22:59，週一至週五（台灣時間 08:00~隔日 06:59）
+  workflow_dispatch:              # 允許手動在 GitHub 頁面觸發，方便測試
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5            # 最多執行 5 分鐘，避免 Actions 卡住
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run risk notifier
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: node notify.mjs
