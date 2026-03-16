@@ -7,7 +7,7 @@
 
 name: Risk Sentinel Notify
 
-on:
+off:
   schedule:
     # UTC 時間，台灣時間 = UTC+8
     # 下方設定為「台灣時間 週一至週五 08:00 ~ 隔日 06:00（即美股盤中+盤前）」
